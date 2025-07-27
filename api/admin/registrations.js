@@ -71,8 +71,10 @@ export default async function handler(req, res) {
         const parts = urlNoQuery.split('/');
         id = parts[parts.length - 1];
       }
-      console.log('Edit/Delete request:', { method, url: req.url, id });
-      if (!id || id.length < 10) return res.status(400).json({ error: 'Missing or invalid registration id.', id });
+      // Validate MongoDB ObjectId (24 hex chars)
+      if (!id || !/^[a-fA-F0-9]{24}$/.test(id)) {
+        return res.status(400).json({ error: 'Invalid registration id.', id });
+      }
       try {
         if (method === 'PUT') {
           const updated = await Registration.findByIdAndUpdate(id, req.body, { new: true });
@@ -85,7 +87,6 @@ export default async function handler(req, res) {
           return res.status(200).json({ message: 'Deleted', id });
         }
       } catch (err) {
-        console.error('Edit/Delete error:', err);
         return res.status(500).json({ error: 'Database error', details: err.message, id });
       }
     }
