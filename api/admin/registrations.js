@@ -66,12 +66,14 @@ export default async function handler(req, res) {
     }
     if (method === 'PUT' || method === 'DELETE') {
       let id = req.query.id;
+      console.log('Request URL:', req.url);
       if (!id) {
-        // Extract id from path using regex
-        const match = req.url.match(/\/api\/admin\/registrations\/?([a-fA-F0-9]{24})/);
+        // Extract id from path using regex (accept any length for debug)
+        const match = req.url.match(/\/api\/admin\/registrations\/?([^/?]+)/);
         if (match && match[1]) id = match[1];
       }
-      if (!id || id.length !== 24) return res.status(400).json({ error: 'Missing or invalid registration id.' });
+      console.log('Extracted id:', id);
+      if (!id) return res.status(400).json({ error: 'Missing registration id.' });
       if (method === 'PUT') {
         const updated = await Registration.findByIdAndUpdate(id, req.body, { new: true });
         if (!updated) return res.status(404).json({ error: 'Registration not found.' });
