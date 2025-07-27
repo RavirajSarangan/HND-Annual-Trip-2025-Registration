@@ -71,18 +71,15 @@ export default async function handler(req, res) {
         const parts = urlNoQuery.split('/');
         id = parts[parts.length - 1];
       }
-      // Validate MongoDB ObjectId (24 hex chars)
-      if (!id || !/^[a-fA-F0-9]{24}$/.test(id)) {
-        return res.status(400).json({ error: 'Invalid registration id.', id });
-      }
+      if (!id) return res.status(400).json({ error: 'Missing registration id.', id });
       try {
         if (method === 'PUT') {
-          const updated = await Registration.findByIdAndUpdate(id, req.body, { new: true });
+          const updated = await Registration.findOneAndUpdate({ _id: id }, req.body, { new: true });
           if (!updated) return res.status(404).json({ error: 'Registration not found.', id });
           return res.status(200).json(updated);
         }
         if (method === 'DELETE') {
-          const deleted = await Registration.findByIdAndDelete(id);
+          const deleted = await Registration.findOneAndDelete({ _id: id });
           if (!deleted) return res.status(404).json({ error: 'Registration not found.', id });
           return res.status(200).json({ message: 'Deleted', id });
         }
