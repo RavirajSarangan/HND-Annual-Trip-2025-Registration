@@ -442,7 +442,7 @@ $(document).ready(function() {
         const formData = {};
         form.serializeArray().forEach(f => formData[f.name] = f.value);
         try {
-            const res = await fetch('http://localhost:5001/api/register', {
+            const res = await fetch('https://hnd-annual-trip-2025-registration.vercel.app/api/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)
