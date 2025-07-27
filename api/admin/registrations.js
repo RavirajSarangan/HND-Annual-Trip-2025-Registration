@@ -73,11 +73,9 @@ export default async function handler(req, res) {
         id = parts[parts.length - 1];
       }
       if (!id) return res.status(400).json({ error: 'Missing registration id.', id });
-      let objectId;
-      try {
-        objectId = Types.ObjectId(id);
-      } catch (e) {
-        return res.status(400).json({ error: 'Invalid ObjectId format.', id });
+      let objectId = id;
+      if (mongoose.Types.ObjectId.isValid(id)) {
+        objectId = new mongoose.Types.ObjectId(id);
       }
       try {
         let result;
