@@ -18,7 +18,11 @@ const ADMIN_PASS = process.env.ADMIN_PASS || 'admin123';
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN || 'admintoken2025';
 
 export default async function handler(req, res) {
-  await dbConnect();
+  try {
+    await dbConnect();
+  } catch (err) {
+    return res.status(500).json({ error: 'MongoDB connection failed', details: err.message });
+  }
   if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST']);
     return res.status(405).end(`Method ${req.method} Not Allowed`);
