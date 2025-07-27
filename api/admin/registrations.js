@@ -64,31 +64,24 @@ export default async function handler(req, res) {
       const reg = await Registration.create(req.body);
       return res.status(201).json(reg);
     }
-    if (method === 'PUT') {
-      // Extract id from query or path
+    if (method === 'PUT' || method === 'DELETE') {
       let id = req.query.id;
       if (!id) {
-        const parts = req.url.split('/');
-        id = parts[parts.length - 1];
-        // Remove query string if present
-        if (id.includes('?')) id = id.split('?')[0];
+        // Extract id from path using regex
+        const match = req.url.match(/\/api\/admin\/registrations\/?([a-fA-F0-9]{24})/);
+        if (match && match[1]) id = match[1];
       }
-      if (!id || id.length < 10) return res.status(400).json({ error: 'Missing or invalid registration id.' });
-      const updated = await Registration.findByIdAndUpdate(id, req.body, { new: true });
-      if (!updated) return res.status(404).json({ error: 'Registration not found.' });
-      return res.status(200).json(updated);
-    }
-    if (method === 'DELETE') {
-      let id = req.query.id;
-      if (!id) {
-        const parts = req.url.split('/');
-        id = parts[parts.length - 1];
-        if (id.includes('?')) id = id.split('?')[0];
+      if (!id || id.length !== 24) return res.status(400).json({ error: 'Missing or invalid registration id.' });
+      if (method === 'PUT') {
+        const updated = await Registration.findByIdAndUpdate(id, req.body, { new: true });
+        if (!updated) return res.status(404).json({ error: 'Registration not found.' });
+        return res.status(200).json(updated);
       }
-      if (!id || id.length < 10) return res.status(400).json({ error: 'Missing or invalid registration id.' });
-      const deleted = await Registration.findByIdAndDelete(id);
-      if (!deleted) return res.status(404).json({ error: 'Registration not found.' });
-      return res.status(200).json({ message: 'Deleted' });
+      if (method === 'DELETE') {
+        const deleted = await Registration.findByIdAndDelete(id);
+        if (!deleted) return res.status(404).json({ error: 'Registration not found.' });
+        return res.status(200).json({ message: 'Deleted' });
+      }
     }
     res.setHeader('Allow', ['GET', 'POST', 'PUT', 'DELETE']);
     res.status(405).end(`Method ${method} Not Allowed`);
