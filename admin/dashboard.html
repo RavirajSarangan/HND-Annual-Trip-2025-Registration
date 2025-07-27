@@ -191,7 +191,7 @@
         const pageData = data.slice(start, start+perPage);
         let html = `<div class='table-responsive'><table class="table table-bordered table-striped mt-3"><thead><tr><th>#</th><th>Name</th><th>Reg No</th><th>Course</th><th>Contact</th><th>Date</th><th>Actions</th></tr></thead><tbody>`;
         pageData.forEach((r, i) => {
-            console.log('Row', i, 'ID:', r._id); // Log the id for debugging
+            // Always use MongoDB _id for Edit/Delete
             html += `<tr><td>${start+i+1}</td><td>${r.fullname}</td><td>${r.reg_number}</td><td>${r.course}</td><td>${r.contact_number}</td><td>${new Date(r.createdAt).toLocaleString()}</td><td><button class='btn btn-info btn-sm btn-animated' onclick='showEdit(${start+i})'>Edit</button> <button class='btn btn-danger btn-sm btn-animated' onclick='deleteRegistration("${r._id}")'>Delete</button></td></tr>`;
         });
         html += '</tbody></table></div>';
