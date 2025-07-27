@@ -451,7 +451,7 @@ $(document).ready(function() {
             const data = await res.json();
             if (res.ok) {
                 showBootstrapAlert(data.message || 'Registration successful!', 'success');
-                form[0].reset();
+                setTimeout(() => form[0].reset(), 100);
             } else {
                 showBootstrapAlert(data.error || 'Registration failed.', 'danger');
             }

@@ -36,7 +36,7 @@
         const alertBox = document.getElementById('admin-login-alert');
         alertBox.innerHTML = '';
         try {
-            const res = await fetch('http://localhost:5001/api/admin/login', {
+            const res = await fetch('https://hnd-annual-trip-2025-registration.vercel.app/api/admin/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password })
