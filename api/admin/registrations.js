@@ -67,21 +67,26 @@ export default async function handler(req, res) {
     if (method === 'PUT' || method === 'DELETE') {
       let id = req.query.id;
       if (!id) {
-        // Extract id from path (last segment before ?)
         const urlNoQuery = req.url.split('?')[0];
         const parts = urlNoQuery.split('/');
         id = parts[parts.length - 1];
       }
-      if (!id || id.length < 10) return res.status(400).json({ error: 'Missing or invalid registration id.' });
-      if (method === 'PUT') {
-        const updated = await Registration.findByIdAndUpdate(id, req.body, { new: true });
-        if (!updated) return res.status(404).json({ error: 'Registration not found.' });
-        return res.status(200).json(updated);
-      }
-      if (method === 'DELETE') {
-        const deleted = await Registration.findByIdAndDelete(id);
-        if (!deleted) return res.status(404).json({ error: 'Registration not found.' });
-        return res.status(200).json({ message: 'Deleted' });
+      console.log('Edit/Delete request:', { method, url: req.url, id });
+      if (!id || id.length < 10) return res.status(400).json({ error: 'Missing or invalid registration id.', id });
+      try {
+        if (method === 'PUT') {
+          const updated = await Registration.findByIdAndUpdate(id, req.body, { new: true });
+          if (!updated) return res.status(404).json({ error: 'Registration not found.', id });
+          return res.status(200).json(updated);
+        }
+        if (method === 'DELETE') {
+          const deleted = await Registration.findByIdAndDelete(id);
+          if (!deleted) return res.status(404).json({ error: 'Registration not found.', id });
+          return res.status(200).json({ message: 'Deleted', id });
+        }
+      } catch (err) {
+        console.error('Edit/Delete error:', err);
+        return res.status(500).json({ error: 'Database error', details: err.message, id });
       }
     }
     res.setHeader('Allow', ['GET', 'POST', 'PUT', 'DELETE']);
