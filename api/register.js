@@ -17,10 +17,17 @@ async function dbConnect() {
 }
 
 const RegistrationSchema = new mongoose.Schema({
+  participation_interest: String,
   fullname: String,
   reg_number: String,
-  course: String,
+  nic_number: String,
   contact_number: String,
+  course: String,
+  batch_number: String,
+  medical_issues: String,
+  medical_details: String,
+  emergency_contact: String,
+  terms: String,
   createdAt: { type: Date, default: Date.now }
 });
 const Registration = mongoose.models.Registration || mongoose.model('Registration', RegistrationSchema);
