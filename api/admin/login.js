@@ -1,35 +1,31 @@
-import mongoose from 'mongoose';
-
-let cached = global.mongoose;
-if (!cached) {
-  cached = global.mongoose = { conn: null, promise: null };
-}
-async function dbConnect() {
-  if (cached.conn) return cached.conn;
-  if (!cached.promise) {
-    cached.promise = mongoose.connect(process.env.MONGODB_URI).then(m => m);
-  }
-  cached.conn = await cached.promise;
-  return cached.conn;
-}
+// This file is now a pure API route for admin login, no DB or external dependencies
 
 const ADMIN_USER = process.env.ADMIN_USER || 'admin';
 const ADMIN_PASS = process.env.ADMIN_PASS || 'admin123';
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN || 'admintoken2025';
 
-export default async function handler(req, res) {
+export default function handler(req, res) {
   try {
-    await dbConnect();
+    if (req.method !== 'POST') {
+      console.warn(`Invalid method: ${req.method} on /api/admin/login`); // Log invalid method
+      res.setHeader('Allow', ['POST']);
+      return res.status(405).json({ error: `Method ${req.method} Not Allowed. Only POST is supported for admin login.` });
+    }
+    let body = req.body;
+    // Vercel sometimes does not parse body automatically
+    if (typeof body === 'string') {
+      try { body = JSON.parse(body); } catch {}
+    }
+    const { username, password } = body || {};
+    if (!username || !password) {
+      return res.status(400).json({ error: 'Username and password required' });
+    }
+    if (username === ADMIN_USER && password === ADMIN_PASS) {
+      return res.status(200).json({ token: ADMIN_TOKEN });
+    }
+    return res.status(401).json({ error: 'Invalid credentials' });
   } catch (err) {
-    return res.status(500).json({ error: 'MongoDB connection failed', details: err.message });
+    console.error('Admin login server error:', err); // Log server error
+    return res.status(500).json({ error: 'Server error', details: err.message });
   }
-  if (req.method !== 'POST') {
-    res.setHeader('Allow', ['POST']);
-    return res.status(405).end(`Method ${req.method} Not Allowed`);
-  }
-  const { username, password } = req.body;
-  if (username === ADMIN_USER && password === ADMIN_PASS) {
-    return res.status(200).json({ token: ADMIN_TOKEN });
-  }
-  return res.status(401).json({ error: 'Invalid credentials' });
 }
