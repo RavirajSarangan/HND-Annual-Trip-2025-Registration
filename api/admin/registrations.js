@@ -76,36 +76,27 @@ export default async function handler(req, res) {
         let result;
         if (method === 'PUT') {
           result = await Registration.findOneAndUpdate({ _id: id }, req.body, { new: true });
+          if (!result) result = await Registration.findOneAndUpdate({ reg_number: id }, req.body, { new: true });
+          if (!result) result = await Registration.findOneAndUpdate({ fullname: id }, req.body, { new: true });
+          if (!result) result = await Registration.findOneAndUpdate({ contact_number: id }, req.body, { new: true });
           if (!result) {
-            result = await Registration.findOneAndUpdate({ reg_number: id }, req.body, { new: true });
+            const allRegs = await Registration.find({}, '_id reg_number fullname contact_number');
+            return res.status(404).json({ error: 'Registration not found.', id, allIds: allRegs });
           }
-          if (!result) {
-            result = await Registration.findOneAndUpdate({ fullname: id }, req.body, { new: true });
-          }
-          if (!result) {
-            result = await Registration.findOneAndUpdate({ contact_number: id }, req.body, { new: true });
-          }
-          console.log('PUT id:', id, 'Update result:', result);
-          if (!result) return res.status(404).json({ error: 'Registration not found.', id });
           return res.status(200).json(result);
         }
         if (method === 'DELETE') {
           result = await Registration.findOneAndDelete({ _id: id });
+          if (!result) result = await Registration.findOneAndDelete({ reg_number: id });
+          if (!result) result = await Registration.findOneAndDelete({ fullname: id });
+          if (!result) result = await Registration.findOneAndDelete({ contact_number: id });
           if (!result) {
-            result = await Registration.findOneAndDelete({ reg_number: id });
+            const allRegs = await Registration.find({}, '_id reg_number fullname contact_number');
+            return res.status(404).json({ error: 'Registration not found.', id, allIds: allRegs });
           }
-          if (!result) {
-            result = await Registration.findOneAndDelete({ fullname: id });
-          }
-          if (!result) {
-            result = await Registration.findOneAndDelete({ contact_number: id });
-          }
-          console.log('DELETE id:', id, 'Delete result:', result);
-          if (!result) return res.status(404).json({ error: 'Registration not found.', id });
           return res.status(200).json({ message: 'Deleted', id });
         }
       } catch (err) {
-        console.error('Database error:', err);
         return res.status(500).json({ error: 'Database error', details: err.message, id });
       }
     }
