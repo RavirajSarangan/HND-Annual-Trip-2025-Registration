@@ -82,6 +82,9 @@ export default async function handler(req, res) {
           if (!result) {
             result = await Registration.findOneAndUpdate({ fullname: id }, req.body, { new: true });
           }
+          if (!result) {
+            result = await Registration.findOneAndUpdate({ contact_number: id }, req.body, { new: true });
+          }
           console.log('PUT id:', id, 'Update result:', result);
           if (!result) return res.status(404).json({ error: 'Registration not found.', id });
           return res.status(200).json(result);
@@ -93,6 +96,9 @@ export default async function handler(req, res) {
           }
           if (!result) {
             result = await Registration.findOneAndDelete({ fullname: id });
+          }
+          if (!result) {
+            result = await Registration.findOneAndDelete({ contact_number: id });
           }
           console.log('DELETE id:', id, 'Delete result:', result);
           if (!result) return res.status(404).json({ error: 'Registration not found.', id });
