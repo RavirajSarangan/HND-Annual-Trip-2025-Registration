@@ -65,14 +65,26 @@ export default async function handler(req, res) {
       return res.status(201).json(reg);
     }
     if (method === 'PUT') {
-      const id = req.query.id || (req.url.split('/').pop() || undefined);
+      // Extract id from query or path
+      let id = req.query.id;
+      if (!id) {
+        const parts = req.url.split('/');
+        id = parts[parts.length - 1];
+        // Remove query string if present
+        if (id.includes('?')) id = id.split('?')[0];
+      }
       if (!id || id.length < 10) return res.status(400).json({ error: 'Missing or invalid registration id.' });
       const updated = await Registration.findByIdAndUpdate(id, req.body, { new: true });
       if (!updated) return res.status(404).json({ error: 'Registration not found.' });
       return res.status(200).json(updated);
     }
     if (method === 'DELETE') {
-      const id = req.query.id || (req.url.split('/').pop() || undefined);
+      let id = req.query.id;
+      if (!id) {
+        const parts = req.url.split('/');
+        id = parts[parts.length - 1];
+        if (id.includes('?')) id = id.split('?')[0];
+      }
       if (!id || id.length < 10) return res.status(400).json({ error: 'Missing or invalid registration id.' });
       const deleted = await Registration.findByIdAndDelete(id);
       if (!deleted) return res.status(404).json({ error: 'Registration not found.' });
