@@ -72,6 +72,7 @@ export default async function handler(req, res) {
         const parts = urlNoQuery.split('/');
         id = parts[parts.length - 1];
       }
+      console.log('Received id:', id);
       if (!id) return res.status(400).json({ error: 'Missing registration id.', id });
       let objectId = id;
       if (mongoose.Types.ObjectId.isValid(id)) {
@@ -81,15 +82,22 @@ export default async function handler(req, res) {
         let result;
         if (method === 'PUT') {
           result = await Registration.findOneAndUpdate({ _id: objectId }, req.body, { new: true });
-          if (!result) return res.status(404).json({ error: 'Registration not found.', id });
+          if (!result) {
+            console.error('Edit failed: Registration not found for id', objectId);
+            return res.status(404).json({ error: 'Registration not found.', id });
+          }
           return res.status(200).json(result);
         }
         if (method === 'DELETE') {
           result = await Registration.findOneAndDelete({ _id: objectId });
-          if (!result) return res.status(404).json({ error: 'Registration not found.', id });
+          if (!result) {
+            console.error('Delete failed: Registration not found for id', objectId);
+            return res.status(404).json({ error: 'Registration not found.', id });
+          }
           return res.status(200).json({ message: 'Deleted', id });
         }
       } catch (err) {
+        console.error('Database error:', err);
         return res.status(500).json({ error: 'Database error', details: err.message, id });
       }
     }
