@@ -1,0 +1,21 @@
+.custom-alert {
+  position: fixed;
+  top: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 250px;
+  max-width: 90vw;
+  padding: 16px 24px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  color: #fff;
+  z-index: 9999;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  opacity: 0.95;
+  &.success {
+    background: #28a745;
+  }
+  &.error {
+    background: #dc3545;
+  }
+}

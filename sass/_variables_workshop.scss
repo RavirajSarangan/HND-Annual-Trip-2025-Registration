@@ -1,0 +1,27 @@
+//-------------------- Base Colors --------------------//
+$body-color: 					#fff;
+$body-text-color:               #555;
+$heading-color:                 #2a2a2a;
+
+$color-1: 						orange;
+$color-2: 						#333;
+$color-3: 						#ffcd00;
+
+$border-color-2: 			    #ededed;
+$border-color-3: 			    #dddddd;
+$border-color-4: 			    #ccc;
+$border-color-5: 			    #ddd;
+
+//-------------------- Line Height Variables --------------------//
+$line-height-base:              1.5;
+$line-height-large:           	1.8;
+$line-height-none:           	1;
+
+//-------------------- Font Families --------------------//
+$font-main: 					'Poppins', sans-serif;
+
+//-------------------- Responsive sizes -------------------- //
+$large-device-width: 1199px; // Large devices (desktops, less than 1200px)
+$medium-device-width: 991px; // Medium devices (tablets, less than 992px)
+$small-device-width: 767px;	// Small devices (landscape phones, less than 768px)
+$extra-small-device-width: 575px;	// Extra small devices (portrait phones, less than 576px)

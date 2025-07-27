@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%); font-family: 'Maven Pro', sans-serif; }
+        .sidebar {
+            position: fixed; left: 0; top: 0; height: 100vh; width: 220px; background: rgba(30,41,59,0.85); color: #fff; box-shadow: 2px 0 32px rgba(30,41,59,0.13); z-index: 1000; display: flex; flex-direction: column; transition: left 0.3s cubic-bezier(.4,0,.2,1), box-shadow 0.4s cubic-bezier(.4,0,.2,1); backdrop-filter: blur(16px); border-right: 2px solid #64748b33; animation: sidebarSlideIn 0.7s cubic-bezier(.4,0,.2,1);
+        }
+        @keyframes sidebarSlideIn { from { left: -240px; opacity: 0; } to { left: 0; opacity: 1; } }
+        .sidebar h2 { font-size: 1.6rem; font-weight: 900; margin: 38px 0 30px 32px; letter-spacing: 2px; text-shadow: 0 2px 12px #0002; }
+        .sidebar a { color: #fff; text-decoration: none; padding: 16px 38px; display: block; border-radius: 12px; margin: 0 16px; transition: background 0.2s, color 0.2s, transform 0.2s; font-weight: 700; font-size: 1.12em; }
+        .sidebar a:hover, .sidebar a.active { background: #64748b; color: #fff; box-shadow: 0 2px 16px #64748b33; transform: scale(1.06) translateX(8px); }
+        .main-content { margin-left: 220px; padding: 56px 36px; min-height: 100vh; transition: margin-left 0.3s cubic-bezier(.4,0,.2,1); }
+        .dashboard-container { max-width: 1240px; margin: 0 auto; background: rgba(255,255,255,0.82); border-radius: 32px; box-shadow: 0 12px 48px rgba(30,41,59,0.15); padding: 56px 40px; animation: fadeInUp 0.8s cubic-bezier(.4,0,.2,1); backdrop-filter: blur(12px); border: 2px solid #e0e7ff99; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(40px);} to { opacity: 1; transform: none; } }
+        .logout-btn { float: right; }
+        .table { border-radius: 20px; overflow: hidden; background: rgba(255,255,255,0.98); box-shadow: 0 2px 16px #64748b11; animation: tableFadeIn 0.7s cubic-bezier(.4,0,.2,1); }
+        @keyframes tableFadeIn { from { opacity: 0; transform: translateY(24px);} to { opacity: 1; transform: none; } }
+        .search-bar { max-width: 350px; float: right; margin-bottom: 12px; border-radius: 10px; }
+        .btn-animated { transition: transform 0.2s cubic-bezier(.4,0,.2,1), box-shadow 0.2s; border-radius: 10px; font-weight: 700; letter-spacing: 0.7px; box-shadow: 0 2px 12px #64748b22; }
+        .btn-animated:hover { transform: translateY(-2px) scale(1.08); box-shadow: 0 8px 24px rgba(30,41,59,0.15); }
+        .dashboard-container h3, .dashboard-container h2 { font-weight: 900; letter-spacing: 1.5px; }
+        .card { border-radius: 22px; box-shadow: 0 4px 24px #64748b22; background: rgba(255,255,255,0.95); transition: box-shadow 0.2s, transform 0.2s; animation: cardPopIn 0.7s cubic-bezier(.4,0,.2,1); }
+        .card:hover { box-shadow: 0 12px 40px #64748b33; transform: translateY(-6px) scale(1.04); }
+        @keyframes cardPopIn { from { opacity: 0; transform: scale(0.93);} to { opacity: 1; transform: scale(1); } }
+        .modal-content { border-radius: 22px; }
+        .form-control { border-radius: 10px; }
+        .btn { border-radius: 10px; }
+        .pagination .page-link { border-radius: 10px !important; }
+        /* Floating action bar */
+        .floating-bar { position: fixed; bottom: 32px; right: 36px; z-index: 2000; display: flex; gap: 18px; }
+        .floating-bar .btn { box-shadow: 0 4px 18px #64748b33; font-size: 1.2em; padding: 14px 22px; }
+        /* Responsive */
+        @media (max-width: 900px) {
+            .main-content { margin-left: 0; padding: 12px 2vw; }
+            .sidebar {
+                position: static;
+                width: 100%;
+                height: auto;
+                flex-direction: row;
+                border-radius: 0 0 18px 18px;
+                box-shadow: 0 4px 24px #64748b22;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0 8px;
+                min-height: 56px;
+            }
+            .sidebar h2 { margin: 0 0 0 12px; font-size: 1.1rem; }
+            .sidebar a { margin: 0 4px; padding: 10px 10px; font-size: 0.98em; border-radius: 7px; }
+            .dashboard-container { padding: 10px 2vw; border-radius: 14px; }
+        }
+        @media (max-width: 600px) {
+            .dashboard-container { padding: 4px 0.5vw; border-radius: 8px; }
+            .sidebar { min-height: 44px; }
+            .sidebar h2 { font-size: 0.98rem; }
+            .sidebar a { font-size: 0.92em; padding: 7px 4px; }
+            .table { font-size: 0.92em; }
+            .card { font-size: 0.98em; }
+            .search-bar { width: 100% !important; max-width: 100%; margin-bottom: 8px; }
+            .btn-animated, .btn { font-size: 0.98em; padding: 8px 10px; }
+            .pagination .page-link { font-size: 0.92em; }
+        }
+        /* Make table horizontally scrollable on mobile */
+        .table-responsive { width: 100%; overflow-x: auto; }
+        @media (max-width: 900px) {
+            .table-responsive { margin-bottom: 12px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>Admin Panel</h2>
+        <a href="dashboard.html" class="active">Dashboard</a>
+        <a href="#" onclick="openAddAdminModal()">Add Admin</a>
+        <a href="#" onclick="logout()">Logout</a>
+    </div>
+    <div class="main-content">
+    <div class="dashboard-container">
+        <div class="row mb-4" id="analyticsRow">
+            <!-- Analytics cards will be rendered here -->
+        </div>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="mb-0">Registrations</h3>
+            <div>
+                <input type="text" id="searchInput" class="form-control search-bar d-inline-block" placeholder="Search..." oninput="filterTable()" style="width:220px;">
+                <button class="btn btn-success btn-animated ms-2" onclick="exportCSV()">Export CSV</button>
+            </div>
+        </div>
+        <div id="admin-table-container">
+            <div class="text-center my-4">Loading...</div>
+        </div>
+        <nav><ul class="pagination justify-content-center" id="pagination"></ul></nav>
+    </div>
+    </div>
+    <!-- Edit Modal -->
+    <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Edit Registration</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <form id="editForm"><div class="modal-body" id="editModalBody"></div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary btn-animated">Save Changes</button>
+          </div></form>
+        </div>
+      </div>
+    </div>
+    <!-- Add Admin Modal -->
+    <div class="modal fade" id="addAdminModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Add Admin</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <form id="addAdminForm"><div class="modal-body">
+            <div class="mb-3"><label>Username</label><input type="text" class="form-control" name="username" required></div>
+            <div class="mb-3"><label>Password</label><input type="password" class="form-control" name="password" required></div>
+            <div id="addAdminAlert"></div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary btn-animated">Add Admin</button>
+          </div></form>
+        </div>
+      </div>
+    </div>
+    <div id="admin-float-alert-stack" style="position:fixed;top:32px;left:50%;transform:translateX(-50%);z-index:9999;width:auto;max-width:90vw;display:flex;flex-direction:column;align-items:center;pointer-events:none;"></div>
+    <script src="../js/bootstrap.bundle.min.js"></script>
+    <script>
+    function logout() {
+        localStorage.removeItem('adminToken');
+        window.location.href = 'login.html';
+    }
+    let registrations = [];
+    let editIdx = null;
+    let currentPage = 1;
+    const perPage = 10;
+    async function fetchRegistrations() {
+        const container = document.getElementById('admin-table-container');
+        try {
+            const res = await fetch('http://localhost:5001/api/admin/registrations', {
+                headers: { 'Authorization': 'Bearer ' + (localStorage.getItem('adminToken') || '') }
+            });
+            if (!res.ok) {
+                if (res.status === 401) {
+                    container.innerHTML = '<div class="alert alert-danger">Session expired or unauthorized. Please log in again.</div>';
+                    setTimeout(() => logout(), 1800);
+                } else {
+                    container.innerHTML = '<div class="alert alert-danger">Server error. Please try again later.</div>';
+                }
+                return;
+            }
+            registrations = await res.json();
+            renderTable(registrations);
+        } catch (err) {
+            container.innerHTML = '<div class="alert alert-danger">Failed to load registrations.</div>';
+        }
+    }
+    function renderAnalytics(data) {
+        const total = data.length;
+        const byCourse = {};
+        data.forEach(r => {
+            if (!byCourse[r.course]) byCourse[r.course] = 0;
+            byCourse[r.course]++;
+        });
+        let html = `<div class='col-md-3 mb-3'><div class='card shadow-sm p-3 text-center'><h5>Total</h5><div style='font-size:2em;font-weight:700;'>${total}</div></div></div>`;
+        Object.keys(byCourse).forEach(c => {
+            html += `<div class='col-md-3 mb-3'><div class='card shadow-sm p-3 text-center'><h6>${c}</h6><div style='font-size:1.5em;font-weight:600;'>${byCourse[c]}</div></div></div>`;
+        });
+        document.getElementById('analyticsRow').innerHTML = html;
+    }
+    function renderTable(data) {
+        renderAnalytics(data);
+        const container = document.getElementById('admin-table-container');
+        if (!data.length) {
+            container.innerHTML = '<div class="alert alert-info">No registrations found.</div>';
+            document.getElementById('pagination').innerHTML = '';
+            return;
+        }
+        // Pagination
+        const totalPages = Math.ceil(data.length / perPage);
+        if (currentPage > totalPages) currentPage = 1;
+        const start = (currentPage-1)*perPage;
+        const pageData = data.slice(start, start+perPage);
+        let html = `<div class='table-responsive'><table class="table table-bordered table-striped mt-3"><thead><tr><th>#</th><th>Name</th><th>Reg No</th><th>Course</th><th>Contact</th><th>Date</th><th>Actions</th></tr></thead><tbody>`;
+        pageData.forEach((r, i) => {
+            html += `<tr><td>${start+i+1}</td><td>${r.fullname}</td><td>${r.reg_number}</td><td>${r.course}</td><td>${r.contact_number}</td><td>${new Date(r.createdAt).toLocaleString()}</td><td><button class='btn btn-info btn-sm btn-animated' onclick='showEdit(${start+i})'>Edit</button> <button class='btn btn-danger btn-sm btn-animated' onclick='deleteRegistration("${r._id}")'>Delete</button></td></tr>`;
+        });
+        html += '</tbody></table></div>';
+        container.innerHTML = html;
+        // Pagination controls
+        let pagHtml = '';
+        for (let p=1; p<=totalPages; p++) {
+            pagHtml += `<li class='page-item${p===currentPage?' active':''}'><a class='page-link' href='#' onclick='gotoPage(${p});return false;'>${p}</a></li>`;
+        }
+        document.getElementById('pagination').innerHTML = pagHtml;
+    }
+    function gotoPage(p) { currentPage = p; renderTable(registrations); }
+    function filterTable() {
+        const val = document.getElementById('searchInput').value.toLowerCase();
+        const filtered = registrations.filter(r =>
+            (r.fullname && r.fullname.toLowerCase().includes(val)) ||
+            (r.reg_number && r.reg_number.toLowerCase().includes(val)) ||
+            (r.course && r.course.toLowerCase().includes(val))
+        );
+        renderTable(filtered);
+    }
+    function showEdit(idx) {
+        editIdx = idx;
+        const r = registrations[idx];
+        let html = '';
+        for (const key in r) {
+            if (key === '_id' || key === '__v' || key === 'createdAt') continue;
+            html += `<div class='mb-3'><label class='form-label'>${key.replace(/_/g,' ').replace(/\b\w/g, l => l.toUpperCase())}</label><input class='form-control' name='${key}' value='${r[key]||''}'></div>`;
+        }
+        document.getElementById('editModalBody').innerHTML = html;
+        var modal = new bootstrap.Modal(document.getElementById('editModal'));
+        modal.show();
+    }
+    document.getElementById('editForm').onsubmit = async function(e) {
+        e.preventDefault();
+        const r = registrations[editIdx];
+        const form = e.target;
+        const data = {};
+        for (const el of form.elements) {
+            if (el.name) data[el.name] = el.value;
+        }
+        try {
+            const res = await fetch(`/api/admin/registrations/${r._id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('adminToken') || '') },
+                body: JSON.stringify(data)
+            });
+            const result = await res.json().catch(() => ({}));
+            if (res.ok) {
+                bootstrap.Modal.getInstance(document.getElementById('editModal')).hide();
+                showAdminAlert('Registration updated successfully.', 'success');
+                await fetchRegistrations();
+            } else {
+                let errMsg = result.error || 'Update failed';
+                if (res.status === 401) {
+                    showAdminAlert('Session expired or unauthorized. Please log in again.', 'danger');
+                    setTimeout(() => { logout(); }, 1500);
+                    return;
+                }
+                showAdminAlert('Update failed: ' + errMsg, 'danger');
+            }
+        } catch (err) {
+            showAdminAlert('Update failed. Please try again.', 'danger');
+        }
+    };
+    async function deleteRegistration(id) {
+        if (!confirm('Are you sure you want to delete this registration?')) return;
+        try {
+            const res = await fetch(`/api/admin/registrations/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': 'Bearer ' + (localStorage.getItem('adminToken') || '') }
+            });
+            const result = await res.json().catch(() => ({}));
+            if (res.ok) {
+                showAdminAlert('Registration deleted successfully.', 'success');
+                await fetchRegistrations();
+            } else {
+                let errMsg = result.error || 'Delete failed';
+                if (res.status === 401) {
+                    showAdminAlert('Session expired or unauthorized. Please log in again.', 'danger');
+                    setTimeout(() => { logout(); }, 1500);
+                    return;
+                }
+                showAdminAlert('Delete failed: ' + errMsg, 'danger');
+            }
+        } catch (err) {
+            showAdminAlert('Delete failed. Please try again.', 'danger');
+        }
+    }
+    function exportCSV() {
+        fetch('http://localhost:5001/api/admin/export', {
+            headers: { 'Authorization': 'Bearer ' + (localStorage.getItem('adminToken') || '') }
+        })
+        .then(res => {
+            if (!res.ok) throw new Error('Export failed');
+            return res.blob();
+        })
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'registrations.csv';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+            showAdminAlert('CSV exported!', 'success');
+        })
+        .catch(() => showAdminAlert('Export failed', 'danger'));
+    }
+    function openAddAdminModal() {
+        var modal = new bootstrap.Modal(document.getElementById('addAdminModal'));
+        document.getElementById('addAdminForm').reset();
+        document.getElementById('addAdminAlert').innerHTML = '';
+        modal.show();
+    }
+    document.getElementById('addAdminForm').onsubmit = async function(e) {
+        e.preventDefault();
+        const form = e.target;
+        const data = { username: form.username.value, password: form.password.value };
+        try {
+            const res = await fetch('/api/admin/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('adminToken') || '') },
+                body: JSON.stringify(data)
+            });
+            const result = await res.json();
+            if (res.ok) {
+                document.getElementById('addAdminAlert').innerHTML = `<div class='alert alert-success mt-2'>${result.message}</div>`;
+                showAdminAlert('Admin added successfully.');
+                setTimeout(() => bootstrap.Modal.getInstance(document.getElementById('addAdminModal')).hide(), 1200);
+                await fetchRegistrations(); // Refresh analytics and table
+            } else {
+                document.getElementById('addAdminAlert').innerHTML = `<div class='alert alert-danger mt-2'>${result.error || 'Failed'}</div>`;
+            }
+        } catch (err) {
+            document.getElementById('addAdminAlert').innerHTML = `<div class='alert alert-danger mt-2'>Server error</div>`;
+        }
+    };
+    // On page load, check token and backend health
+    (async function() {
+        if (!localStorage.getItem('adminToken')) {
+            window.location.href = 'login.html';
+            return;
+        }
+        try {
+            const res = await fetch('http://localhost:5001/api/health');
+            if (!res.ok) {
+                showAdminAlert('Server or database not connected. Please try again later.', 'danger');
+                return;
+            }
+            const data = await res.json();
+            if (data.status !== 'ok') {
+                showAdminAlert('Server or database not connected. Please try again later.', 'danger');
+                return;
+            }
+            fetchRegistrations();
+        } catch (err) {
+            showAdminAlert('Server or database not connected. Please try again later.', 'danger');
+        }
+    })();
+    // Modern floating alert for admin actions
+function showAdminAlert(message, type = 'success') {
+    let alertStack = document.getElementById('admin-float-alert-stack');
+    if (!alertStack) {
+        alertStack = document.createElement('div');
+        alertStack.id = 'admin-float-alert-stack';
+        alertStack.style.position = 'fixed';
+        alertStack.style.top = '32px';
+        alertStack.style.left = '50%';
+        alertStack.style.transform = 'translateX(-50%)';
+        alertStack.style.zIndex = '9999';
+        alertStack.style.width = 'auto';
+        alertStack.style.maxWidth = '90vw';
+        alertStack.style.display = 'flex';
+        alertStack.style.flexDirection = 'column';
+        alertStack.style.alignItems = 'center';
+        alertStack.style.pointerEvents = 'none';
+        document.body.appendChild(alertStack);
+    }
+    const icons = {
+        success: `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" style="vertical-align:middle;"><circle cx="12" cy="12" r="12" fill="#d1f7e7"/><path d="M7 13.5l3 3 7-7" stroke="#198754" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+        danger: `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" style="vertical-align:middle;"><circle cx="12" cy="12" r="12" fill="#ffe0e0"/><path d="M8 8l8 8M16 8l-8 8" stroke="#a12a2a" stroke-width="2.2" stroke-linecap="round"/></svg>`,
+        info: `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" style="vertical-align:middle;"><circle cx="12" cy="12" r="12" fill="#e0f2fe"/><path d="M12 8v4m0 4h.01" stroke="#0ea5e9" stroke-width="2.2" stroke-linecap="round"/></svg>`
+    };
+    const alertDiv = document.createElement('div');
+    alertDiv.className = 'admin-float-alert-slide';
+    alertDiv.style.background = type === 'success' ? 'linear-gradient(90deg,#d1f7e7 0,#b6e6d6 100%)' : type === 'danger' ? 'linear-gradient(90deg,#ffe0e0 0,#ffd6d6 100%)' : 'linear-gradient(90deg,#e0f2fe 0,#bae6fd 100%)';
+    alertDiv.style.color = type === 'success' ? '#155c3b' : type === 'danger' ? '#a12a2a' : '#0ea5e9';
+    alertDiv.style.border = type === 'success' ? '1.5px solid #aee5c7' : type === 'danger' ? '1.5px solid #f5bcbc' : '1.5px solid #bae6fd';
+    alertDiv.style.borderRadius = '14px';
+    alertDiv.style.fontSize = '1.12rem';
+    alertDiv.style.fontWeight = '700';
+    alertDiv.style.boxShadow = '0 8px 32px rgba(0,0,0,0.13)';
+    alertDiv.style.textAlign = 'center';
+    alertDiv.style.margin = '0 0 12px 0';
+    alertDiv.style.minWidth = '320px';
+    alertDiv.style.maxWidth = '90vw';
+    alertDiv.style.padding = '18px 40px 18px 32px';
+    alertDiv.style.position = 'relative';
+    alertDiv.style.opacity = '0';
+    alertDiv.style.transform = 'translateY(-32px) scale(0.98)';
+    alertDiv.style.transition = 'opacity 0.5s cubic-bezier(.4,0,.2,1), transform 0.5s cubic-bezier(.4,0,.2,1)';
+    alertDiv.setAttribute('role', 'alert');
+    alertDiv.innerHTML = `
+        <span style="margin-right:10px;">${icons[type] || ''}</span>
+        <span style="vertical-align:middle;">${message}</span>
+        <button aria-label="Close alert" style="position:absolute;right:16px;top:12px;background:transparent;border:none;font-size:1.3em;line-height:1;color:inherit;cursor:pointer;pointer-events:auto;">&times;</button>
+    `;
+    // Close button and click anywhere on alert
+    const closeAlert = () => {
+        alertDiv.style.opacity = '0';
+        alertDiv.style.transform = 'translateY(-32px) scale(0.98)';
+        setTimeout(() => {
+            if (alertDiv.parentNode) { alertDiv.parentNode.removeChild(alertDiv); }
+        }, 500);
+    };
+    alertDiv.querySelector('button').onclick = closeAlert;
+    alertDiv.onclick = closeAlert;
+    alertStack.appendChild(alertDiv);
+    setTimeout(() => {
+        alertDiv.style.opacity = '1';
+        alertDiv.style.transform = 'translateY(0) scale(1)';
+    }, 10);
+    setTimeout(closeAlert, 4000);
+}
+    // Auto-refresh registrations every 10 seconds
+setInterval(() => {
+    if (window.location.pathname.includes('dashboard.html')) fetchRegistrations();
+}, 10000);
+    </script>
+</body>
+</html>

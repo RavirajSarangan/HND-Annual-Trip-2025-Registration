@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login</title>
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: #f5f6fa; }
+        .login-container { max-width: 400px; margin: 80px auto; background: #fff; border-radius: 10px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); padding: 32px; }
+        .form-control { border-radius: 8px; }
+        .btn-primary { border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h3 class="mb-4 text-center">Admin Login</h3>
+        <form id="admin-login-form">
+            <div class="mb-3">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" class="form-control" id="username" required>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Login</button>
+        </form>
+        <div id="admin-login-alert"></div>
+    </div>
+    <script>
+    document.getElementById('admin-login-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const alertBox = document.getElementById('admin-login-alert');
+        alertBox.innerHTML = '';
+        try {
+            const res = await fetch('http://localhost:5001/api/admin/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                localStorage.setItem('adminToken', data.token);
+                // Fallback: ensure redirect always happens
+                setTimeout(() => { window.location.href = 'dashboard.html'; }, 200);
+                window.location.href = 'dashboard.html';
+            } else {
+                alertBox.innerHTML = `<div class='alert alert-danger mt-3'>${data.error || 'Login failed'}</div>`;
+            }
+        } catch (err) {
+            alertBox.innerHTML = `<div class='alert alert-danger mt-3'>Server error</div>`;
+        }
+    });
+    </script>
+</body>
+</html>
