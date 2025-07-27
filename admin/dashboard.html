@@ -417,6 +417,8 @@ function showAdminAlert(message, type = 'success') {
 setInterval(() => {
     if (window.location.pathname.includes('dashboard.html')) fetchRegistrations();
 }, 10000);
+window.openEditModal = openEditModal;
+window.openDeleteModal = openDeleteModal;
     </script>
 </body>
 </html>
