@@ -324,10 +324,10 @@
                 setTimeout(() => bootstrap.Modal.getInstance(document.getElementById('addAdminModal')).hide(), 1200);
                 await fetchRegistrations(); // Refresh analytics and table
             } else {
-                document.getElementById('addAdminAlert').innerHTML = `<div class='alert alert-danger mt-2'>${result.error || 'Failed'}</div>`;
+                document.getElementById('addAdminAlert').innerHTML = `<div class='alert alert-danger mt-2'>${result.error || result.details || 'Failed'}</div>`;
             }
         } catch (err) {
-            document.getElementById('addAdminAlert').innerHTML = `<div class='alert alert-danger mt-2'>Server error</div>`;
+            document.getElementById('addAdminAlert').innerHTML = `<div class='alert alert-danger mt-2'>${err.message || err || 'Server error'}</div>`;
         }
     };
     // On page load, check token and backend health
