@@ -12,7 +12,8 @@ app.use(express.json());
 const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/yourdbname';
 console.log('Connecting to MongoDB:', mongoUri);
 
-mongoose.connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true })
+// Remove deprecated options from mongoose.connect
+mongoose.connect(mongoUri)
   .then(() => {
     console.log('MongoDB connected successfully');
   })
