@@ -77,8 +77,10 @@ export default async function handler(req, res) {
         if (method === 'PUT') {
           result = await Registration.findOneAndUpdate({ _id: id }, req.body, { new: true });
           if (!result) {
-            // Fallback: try reg_number
             result = await Registration.findOneAndUpdate({ reg_number: id }, req.body, { new: true });
+          }
+          if (!result) {
+            result = await Registration.findOneAndUpdate({ fullname: id }, req.body, { new: true });
           }
           console.log('PUT id:', id, 'Update result:', result);
           if (!result) return res.status(404).json({ error: 'Registration not found.', id });
@@ -87,8 +89,10 @@ export default async function handler(req, res) {
         if (method === 'DELETE') {
           result = await Registration.findOneAndDelete({ _id: id });
           if (!result) {
-            // Fallback: try reg_number
             result = await Registration.findOneAndDelete({ reg_number: id });
+          }
+          if (!result) {
+            result = await Registration.findOneAndDelete({ fullname: id });
           }
           console.log('DELETE id:', id, 'Delete result:', result);
           if (!result) return res.status(404).json({ error: 'Registration not found.', id });
