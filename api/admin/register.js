@@ -1,16 +1,23 @@
 import mongoose from 'mongoose';
 
+// Enable CORS for serverless function
+export const config = {
+  api: {
+    bodyParser: true,
+  },
+};
+
 let cached = global.mongoose;
 if (!cached) {
   cached = global.mongoose = { conn: null, promise: null };
 }
 async function dbConnect() {
+  if (!process.env.MONGODB_URI) {
+    throw new Error('Missing MONGODB_URI environment variable.');
+  }
   if (cached.conn) return cached.conn;
   if (!cached.promise) {
-    cached.promise = mongoose.connect(process.env.MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    }).then(m => m);
+    cached.promise = mongoose.connect(process.env.MONGODB_URI).then(m => m);
   }
   cached.conn = await cached.promise;
   return cached.conn;
@@ -33,9 +40,12 @@ const RegistrationSchema = new mongoose.Schema({
 const Registration = mongoose.models.Registration || mongoose.model('Registration', RegistrationSchema);
 
 export default async function handler(req, res) {
-  // Check for MongoDB URI
-  if (!process.env.MONGODB_URI) {
-    return res.status(500).json({ error: 'Missing MONGODB_URI environment variable.' });
+  // Set CORS headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
   }
   try {
     await dbConnect();
