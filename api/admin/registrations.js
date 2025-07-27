@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+const { Types } = mongoose;
 
 // Enable CORS for serverless function
 export const config = {
@@ -72,15 +73,21 @@ export default async function handler(req, res) {
         id = parts[parts.length - 1];
       }
       if (!id) return res.status(400).json({ error: 'Missing registration id.', id });
+      let objectId;
+      try {
+        objectId = Types.ObjectId(id);
+      } catch (e) {
+        return res.status(400).json({ error: 'Invalid ObjectId format.', id });
+      }
       try {
         let result;
         if (method === 'PUT') {
-          result = await Registration.findOneAndUpdate({ _id: id }, req.body, { new: true });
+          result = await Registration.findOneAndUpdate({ _id: objectId }, req.body, { new: true });
           if (!result) return res.status(404).json({ error: 'Registration not found.', id });
           return res.status(200).json(result);
         }
         if (method === 'DELETE') {
-          result = await Registration.findOneAndDelete({ _id: id });
+          result = await Registration.findOneAndDelete({ _id: objectId });
           if (!result) return res.status(404).json({ error: 'Registration not found.', id });
           return res.status(200).json({ message: 'Deleted', id });
         }
