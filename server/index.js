@@ -66,11 +66,19 @@ let ADMIN_PASS = process.env.ADMIN_PASS || 'admin123';
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN || 'admintoken2025';
 
 app.post('/api/admin/login', (req, res) => {
-  const { username, password } = req.body;
-  if (username === ADMIN_USER && password === ADMIN_PASS) {
-    return res.json({ token: ADMIN_TOKEN });
+  try {
+    const { username, password } = req.body || {};
+    if (!username || !password) {
+      return res.status(400).json({ error: 'Username and password required' });
+    }
+    if (username === ADMIN_USER && password === ADMIN_PASS) {
+      return res.json({ token: ADMIN_TOKEN });
+    }
+    res.status(401).json({ error: 'Invalid credentials' });
+  } catch (err) {
+    console.error('Admin login error:', err);
+    res.status(500).json({ error: 'Server error', details: err.message });
   }
-  res.status(401).json({ error: 'Invalid credentials' });
 });
 
 // --- Enhanced error logging for admin endpoints ---
