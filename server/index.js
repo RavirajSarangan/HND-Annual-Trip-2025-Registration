@@ -206,6 +206,18 @@ app.get('/api/admin/export', async (req, res) => {
   res.send(csv);
 });
 
+// Auto-update endpoint for server health and environment debug
+app.get('/api/debug/env', (req, res) => {
+  res.json({
+    ADMIN_USER: process.env.ADMIN_USER,
+    ADMIN_PASS: process.env.ADMIN_PASS ? '***' : undefined,
+    ADMIN_TOKEN: process.env.ADMIN_TOKEN,
+    MONGODB_URI: process.env.MONGODB_URI ? 'set' : 'not set',
+    NODE_ENV: process.env.NODE_ENV,
+    dbState: mongoose.connection.readyState
+  });
+});
+
 // Global error handler for uncaught errors
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err);
