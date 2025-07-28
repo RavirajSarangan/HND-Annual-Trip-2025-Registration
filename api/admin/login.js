@@ -6,33 +6,16 @@ const ADMIN_TOKEN = process.env.ADMIN_TOKEN || 'admintoken2025';
 
 export default function handler(req, res) {
   try {
-    // Set CORS headers
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    if (req.method === 'OPTIONS') {
-      return res.status(200).end();
-    }
     if (req.method !== 'POST') {
-      console.warn(`Invalid method: ${req.method} on /api/admin/login`);
       res.setHeader('Allow', ['POST']);
-      return res.status(405).json({ error: `Method ${req.method} Not Allowed. Only POST is supported for admin login.` });
+      return res.status(405).json({ error: `Method ${req.method} Not Allowed` });
     }
     let body = req.body;
-    // Ensure body is parsed if it's a string
+    // Vercel sometimes does not parse body automatically
     if (typeof body === 'string') {
-      try {
-        body = JSON.parse(body);
-      } catch (e) {
-        console.error('Body parsing failed:', e);
-        return res.status(400).json({ error: 'Invalid request body format' });
-      }
+      try { body = JSON.parse(body); } catch {}
     }
-    if (!body || typeof body !== 'object') {
-      console.error('Request body missing or not an object:', body);
-      return res.status(400).json({ error: 'Request body must be a JSON object' });
-    }
-    const { username, password } = body;
+    const { username, password } = body || {};
     if (!username || !password) {
       return res.status(400).json({ error: 'Username and password required' });
     }
@@ -41,7 +24,6 @@ export default function handler(req, res) {
     }
     return res.status(401).json({ error: 'Invalid credentials' });
   } catch (err) {
-    console.error('Admin login server error:', err);
     return res.status(500).json({ error: 'Server error', details: err.message });
   }
 }
