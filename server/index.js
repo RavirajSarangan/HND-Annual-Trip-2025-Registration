@@ -218,9 +218,9 @@ app.get('/api/debug/env', (req, res) => {
   });
 });
 
-// Global error handler for uncaught errors
+// Global error handler for all unhandled errors
 app.use((err, req, res, next) => {
-  console.error('Unhandled error:', err);
+  console.error('Global error handler:', err);
   res.status(500).json({ error: 'Internal server error', details: err.message });
 });
 
