@@ -74,9 +74,12 @@ export default async function handler(req, res) {
       }
       console.log('Received id:', id);
       if (!id) return res.status(400).json({ error: 'Missing registration id.', id });
-      let objectId = id;
-      if (mongoose.Types.ObjectId.isValid(id)) {
-        objectId = new mongoose.Types.ObjectId(id);
+      let objectId;
+      try {
+        objectId = mongoose.Types.ObjectId.isValid(id) ? new mongoose.Types.ObjectId(id) : id;
+      } catch (e) {
+        console.error('Invalid ObjectId:', id, e);
+        return res.status(400).json({ error: 'Invalid ObjectId format.', id });
       }
       try {
         let result;
@@ -89,8 +92,8 @@ export default async function handler(req, res) {
           return res.status(200).json(result);
         }
         if (method === 'DELETE') {
-          result = await Registration.findOneAndDelete({ _id: objectId });
-          if (!result) {
+          result = await Registration.deleteOne({ _id: objectId });
+          if (!result.deletedCount) {
             console.error('Delete failed: Registration not found for id', objectId);
             return res.status(404).json({ error: 'Registration not found.', id });
           }
