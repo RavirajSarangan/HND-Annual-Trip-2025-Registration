@@ -6,6 +6,13 @@ const ADMIN_TOKEN = process.env.ADMIN_TOKEN || 'admintoken2025';
 
 export default function handler(req, res) {
   try {
+    // Set CORS headers
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    if (req.method === 'OPTIONS') {
+      return res.status(200).end();
+    }
     if (req.method !== 'POST') {
       console.warn(`Invalid method: ${req.method} on /api/admin/login`);
       res.setHeader('Allow', ['POST']);
