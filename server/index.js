@@ -218,10 +218,25 @@ app.get('/api/debug/env', (req, res) => {
   });
 });
 
+// Auto-update: Health check and auto-reconnect for MongoDB
+setInterval(() => {
+  if (mongoose.connection.readyState !== 1 && process.env.MONGODB_URI) {
+    mongoose.connect(process.env.MONGODB_URI).catch(err => {
+      console.error('Auto-reconnect failed:', err.message);
+    });
+  }
+}, 15000); // every 15 seconds
+
 // Global error handler for all unhandled errors
 app.use((err, req, res, next) => {
   console.error('Global error handler:', err);
+  if (res.headersSent) return next(err);
   res.status(500).json({ error: 'Internal server error', details: err.message });
+});
+
+// Add a catch-all route for undefined API endpoints
+app.use((req, res) => {
+  res.status(404).json({ error: 'API endpoint not found', path: req.originalUrl });
 });
 
 const PORT = process.env.PORT || 5001;
