@@ -52,6 +52,7 @@ export default async function handler(req, res) {
   try {
     await dbConnect();
   } catch (err) {
+    console.error('MongoDB connection failed:', err);
     return res.status(500).json({ error: 'MongoDB connection failed', details: err.message });
   }
   const { method } = req;
@@ -61,8 +62,13 @@ export default async function handler(req, res) {
       return res.status(200).json(regs);
     }
     if (method === 'POST') {
-      const reg = await Registration.create(req.body);
-      return res.status(201).json(reg);
+      try {
+        const reg = await Registration.create(req.body);
+        return res.status(201).json({ message: 'Registration successful!', reg });
+      } catch (err) {
+        console.error('Registration failed:', err);
+        return res.status(500).json({ error: 'Registration failed', details: err.message });
+      }
     }
     if (method === 'PUT') {
       let id = req.query.id;
@@ -80,10 +86,11 @@ export default async function handler(req, res) {
         if (!result) {
           // Auto-create if not found
           result = await Registration.create({ ...req.body, _id: id });
-          return res.status(201).json(result);
+          return res.status(201).json({ message: 'Registration created.', result });
         }
-        return res.status(200).json(result);
+        return res.status(200).json({ message: 'Registration updated.', result });
       } catch (err) {
+        console.error('Update failed:', err);
         return res.status(500).json({ error: 'Database error', details: err.message, id });
       }
     }
@@ -103,12 +110,14 @@ export default async function handler(req, res) {
         if (!result) return res.status(404).json({ error: 'Registration not found.', id });
         return res.status(200).json({ message: 'Deleted', id });
       } catch (err) {
+        console.error('Delete failed:', err);
         return res.status(500).json({ error: 'Database error', details: err.message, id });
       }
     }
     res.setHeader('Allow', ['GET', 'POST', 'PUT', 'DELETE']);
     res.status(405).end(`Method ${method} Not Allowed`);
   } catch (err) {
+    console.error('Request failed:', err);
     return res.status(500).json({ error: 'Request failed', details: err.message });
   }
 }

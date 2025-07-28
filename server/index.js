@@ -206,6 +206,12 @@ app.get('/api/admin/export', async (req, res) => {
   res.send(csv);
 });
 
+// Global error handler for uncaught errors
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err);
+  res.status(500).json({ error: 'Internal server error', details: err.message });
+});
+
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

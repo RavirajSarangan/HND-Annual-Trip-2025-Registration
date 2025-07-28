@@ -50,13 +50,15 @@ export default async function handler(req, res) {
   try {
     await dbConnect();
   } catch (err) {
+    console.error('MongoDB connection failed:', err);
     return res.status(500).json({ error: 'MongoDB connection failed', details: err.message });
   }
   if (req.method === 'POST') {
     try {
       const reg = await Registration.create(req.body);
-      return res.status(201).json(reg);
+      return res.status(201).json({ message: 'Registration successful!', reg });
     } catch (err) {
+      console.error('Registration failed:', err);
       return res.status(500).json({ error: 'Registration failed', details: err.message });
     }
   }

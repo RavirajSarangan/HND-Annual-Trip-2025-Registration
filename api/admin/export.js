@@ -46,6 +46,7 @@ export default async function handler(req, res) {
     res.setHeader('Content-Disposition', 'attachment; filename="registrations.csv"');
     res.status(200).send(csv);
   } catch (err) {
+    console.error('Export failed:', err);
     res.status(500).json({ error: 'Export failed', details: err.message });
   }
 }

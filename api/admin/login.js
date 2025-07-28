@@ -24,6 +24,7 @@ export default function handler(req, res) {
     }
     return res.status(401).json({ error: 'Invalid credentials' });
   } catch (err) {
+    console.error('Admin login error:', err);
     return res.status(500).json({ error: 'Server error', details: err.message });
   }
 }
